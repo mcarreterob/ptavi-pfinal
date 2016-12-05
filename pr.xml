@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<config>
+  <server name="PerfectServer" ip="127.0.0.1" port="5555"></server>
+  <database path="registered.txt" passwdpath="passwords.txt"></database>
+  <log path="logpr.txt"></log>
+</config>
