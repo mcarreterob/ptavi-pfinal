@@ -8,6 +8,9 @@ from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 import random
 import os
+import hashlib
+import time
+import json
 
 try:
     config = sys.argv[1]
@@ -31,8 +34,8 @@ class XMLHandler(ContentHandler):
             self.data_list.append(self.config_dic)
             self.config_dic = {}
         elif name == 'database':
-            self.config_dic['path'] = attrs.get('ip', '--')
-            self.config_dic['passwdpath'] = attrs.get('puerto', '--')
+            self.config_dic['path'] = attrs.get('path', '--')
+            self.config_dic['passwdpath'] = attrs.get('passwdpath', '--')
             self.data_list.append(self.config_dic)
             self.config_dic = {}
         elif name == 'log':
@@ -61,7 +64,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
     """
     Echo server class
     """
-    data_client = {} # Diccionario de datos de clientes registrados
+    data_client = {} # Diccionario de clientes registrados
 
     def register2json(self):
         """Metodo con el que cada vez que un usuario se registre o se de
@@ -86,9 +89,10 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
         self.t_actual = time.strftime('%Y-%m-%d %H:%M:%S',
                                       time.gmtime(time.time()))
         for client in self.data_client:
-            self.expire = self.data_client[client][1]
+            self.expire = int(self.data_client[client][-1])
+            print(self.data_client)
             now = time.time()
-            print("now", now, "expire", self.expire)
+            #print("now", now, "expire", self.expire)
             if self.expire < now:
                 tmpList.append(client)
         for cliente in tmpList:
@@ -114,20 +118,48 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                     #self.wfile.write(bytes(nonce))
                     self.wfile.write(b'\r\n\r\n')
                 else:
+                    self.nonce = '45'
+                    self.user = line.split()[1].split(':')[1]
+                    self.port = line.split()[1].split(':')[2]
                     hresponse = line.split()[-1].split('=')[1]
-                    passwd_file = open('passwords', 'r')
+                    passwd_file = open(passwd_path, 'r')
                     passwd_file1 = passwd_file.readlines()
+                    self.expires = line.split()[4]
                     for line in passwd_file1:
                         line_slices = line.split()
                         word = line_slices[1].split('\r\n')
-                        #print(word[0].split('=')[1]) # NO LO ENTIENDO, PREGUNTAR
+                        if line_slices[0] == self.user:
+                            password = word[0].split('=')[1]
+                    m = hashlib.sha1()
+                    m.update(bytes(self.nonce, 'utf-8'))
+                    m.update(bytes(password, 'utf-8'))
+                    response_comparation = m.hexdigest()
+                    if response_comparation == hresponse:
+                        self.json2registered()
+                        self.now = time.time()
+                        self.client_list = []
+                        #self.client_list.append(user)
+                        self.client_list.append(self.client_address[0]) # IP
+                        self.client_list.append(self.port) # Puerto
+                        self.client_list.append(self.now)
+                        self.client_list.append(float(self.expires) +\
+                              float(self.now))
+                        self.data_client[self.user] = self.client_list
+                        self.delete()
+                        self.client_list = []
+                    else:
+                        self.wfile.write(b'SIP/2.0 404 User Not Found')
+                    self.register2json()
             elif metodo == 'INVITE':
+                rtp_port = line.split()[-2]
                 self.wfile.write(b'SIP/2.0 100 Trying\r\n\r\n')
                 self.wfile.write(b'SIP/2.0 180 Ring\r\n\r\n')
                 self.wfile.write(b'SIP/2.0 200 OK\r\n')
                 self.wfile.write(b'Content-Type: application/sdp\r\n\r\n')
-                self.wfile.write(b'v=0\r\n o=leonard@bigbang.com\r\n')
-                self.wfile.write(b's=misesion\r\n m=audio') # Y EL PUERTO DE DONDE LO SACO:)
+                self.wfile.write(b'v=0\r\no=leonard@bigbang.com\r\n')
+                self.wfile.write(b's=misesion\r\nt=0\r\n')
+                self.wfile.write(b'm=audio ' + bytes(rtp_port, 'utf-8'))
+                self.wfile.write(b' RTP')
             elif metodo == 'ACK':
                 aEjecutar = 'mp32rtp -i ' + IP + ' -p 23032 < ' + audio_file
                 print('Vamos a ejecutar', aEjecutar)
@@ -143,5 +175,5 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
 
 # Creamos servidor de eco y escuchamos
 serv = socketserver.UDPServer((serverIP, int(serverPort)), RegisterHandler)
-print("Listening...")
+print('Server BigBangServer listening at port' + serverPort + '...')
 serv.serve_forever()            
