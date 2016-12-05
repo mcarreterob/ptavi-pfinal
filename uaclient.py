@@ -18,11 +18,11 @@ class XMLHandler(ContentHandler):
 
     def __init__(self):
         """Inicializador de varibles. config_dic es un diccionario en el que
-            se guardaran los datos de cada etiqueta. data_list es una lista 
+            se guardaran los datos de cada etiqueta. data_list es una lista
             donde se guardaran todos los diccionarios"""
         self.config_dic = {}
         self.data_list = []
-       
+
     def startElement(self, name, attrs):
         if name == 'account':
             self.config_dic['username'] = attrs.get('username', '--')
@@ -51,7 +51,7 @@ class XMLHandler(ContentHandler):
             self.config_dic['audio_path'] = attrs.get('path', '--')
             self.data_list.append(self.config_dic)
             self.config_dic = {}
-            
+
     def get_data(self):
         return self.data_list
 
@@ -80,33 +80,52 @@ my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 my_socket.connect((regproxy_IP, int(regproxy_port)))
 
 if metodo == 'REGISTER':
-    peticion = 'REGISTER sip:' + username + ':' + regproxy_port + \
+    peticion = 'REGISTER sip:' + username + ':' + uas_port + \
                ' SIP/2.0\r\n' + 'Expires: ' + opcion + '\r\n'
+    print('Enviando: ' + peticion)
+    my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
+    data = my_socket.recv(1024)
+    print('Recibido -- ', data.decode('utf-8'))
+    data_recibido = data.decode('utf-8').split()
+    nonce = data_recibido[-1].split('=')[1]
+    if data_recibido[1] == '401':
+        m = hashlib.sha1()
+        m.update(bytes(nonce, 'utf-8'))
+        m.update(bytes(password, 'utf-8'))
+        response = m.hexdigest()
+        peticion = peticion + 'Authorization: Digest response=' + response
+        print('Enviando: ' + peticion)
+        my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+        data = my_socket.recv(1024)
+        print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'INVITE':
     peticion = 'INVITE sip:' + opcion + 'SIP/2.0\r\n' + \
                'Content-Type: application/sdp\r\n\r\n' + 'v=0\r\n' + \
                'o=' + username + '\r\n' + 's=misesion\r\n' + \
-               't=0\r\n' + 'm=audio' + rtp_port + 'RTP\r\n'
+               't=0\r\n' + 'm=audio ' + rtp_port + ' RTP\r\n'
+    print('Enviando: ' + peticion)
+    my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
+    data = my_socket.recv(1024)
+    print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'ACK':
     peticion = 'ACK sip:' + username + 'SIP/2.0\r\n'
+    print('Enviando: ' + peticion)
+    my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+    data = my_socket.recv(1024)
+    print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'BYE':
-    peticion = 'BYE sip:' + opcion + 'SIP/2.0\r\n'
+    peticion = 'BYE sip:' + opcion + ' SIP/2.0\r\n'
+    print('Enviando: ' + peticion)
+    my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+    data = my_socket.recv(1024)
+    print('Recibido -- ', data.decode('utf-8'))
 
 # ENVIO
 
-print('Enviando: ' + peticion)
-my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
-data = my_socket.recv(1024)
-data_recibido = data.decode('utf-8').split()
-nonce = data_recibido[6].split('=')[1]
+#print('Enviando: ' + peticion)
+#my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
+#data = my_socket.recv(1024)
+#data_recibido = data.decode('utf-8').split()
+#nonce = data_recibido[-1].split('=')[1]
 
-print('Recibido -- ', data.decode('utf-8'))
-
-if data_recibido[1] == '401':
-    m = hashlib.sha1()
-    m.update(bytes(nonce, 'utf-8'))
-    m.update(bytes(password, 'utf-8'))
-    response = m.hexdigest()
-    peticion = peticion + 'Authorization: Digest response=' + response
-    my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
-
+#print('Recibido -- ', data.decode('utf-8'))
