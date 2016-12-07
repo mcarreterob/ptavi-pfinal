@@ -15,11 +15,11 @@ class XMLHandler(ContentHandler):
 
     def __init__(self):
         """Inicializador de varibles. config_dic es un diccionario en el que
-            se guardaran los datos de cada etiqueta. data_list es una lista 
+            se guardaran los datos de cada etiqueta. data_list es una lista
             donde se guardaran todos los diccionarios"""
         self.config_dic = {}
         self.data_list = []
-       
+
     def startElement(self, name, attrs):
         if name == 'account':
             self.config_dic['username'] = attrs.get('username', '--')
@@ -48,7 +48,7 @@ class XMLHandler(ContentHandler):
             self.config_dic['audio_path'] = attrs.get('path', '--')
             self.data_list.append(self.config_dic)
             self.config_dic = {}
-            
+
     def get_data(self):
         return self.data_list
 
@@ -57,9 +57,7 @@ XMLH = XMLHandler()
 parser.setContentHandler(XMLH)
 parser.parse(open(config))
 data_list = XMLH.get_data()
-
 # Variables del config xml
-
 username = data_list[0]['username']
 password = data_list[0]['passwd']
 uas_ip = data_list[1]['uas_ip']
@@ -70,9 +68,7 @@ regproxy_port = data_list[3]['reg_port']
 log_path = data_list[4]['log_path']
 audio_path = data_list[5]['audio_path']
 
-# Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
-
-my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-my_socket.connect((regproxy_IP, int(regproxy_port)))
-
+# Creamos servidor y escuchamos
+serv = socketserver.UDPServer((serverIP, int(serverPort)), RegisterHandler)
+print("Listening...")
+serv.serve_forever()
