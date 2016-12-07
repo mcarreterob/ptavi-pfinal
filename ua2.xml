@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <config>
-  <account username="penny@girlnextdoor.com" passwd="larubia"></account>
-  <uaserver ip="127.0.0.1" puerto="5061"></uaserver>
-  <rtpaudio puerto="23032"></rtpaudio>
-  <regproxy ip="127.0.0.1" puerto="5555"></regproxy>
-  <log path="log2.txt"></log>
-  <audio path="cancion.mp3"></audio>
+  <account username="penny@girlnextdoor.com" passwd="larubia"/>
+  <uaserver ip="127.0.0.1" puerto="5061"/>
+  <rtpaudio puerto="23032"/>
+  <regproxy ip="127.0.0.1" puerto="5555"/>
+  <log path="log2.txt"/>
+  <audio path="cancion.mp3"/>
 </config>
