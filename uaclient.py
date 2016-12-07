@@ -99,9 +99,9 @@ if metodo == 'REGISTER':
         data = my_socket.recv(1024)
         print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'INVITE':
-    peticion = 'INVITE sip:' + opcion + 'SIP/2.0\r\n' + \
+    peticion = 'INVITE sip:' + opcion + ' SIP/2.0\r\n' + \
                'Content-Type: application/sdp\r\n\r\n' + 'v=0\r\n' + \
-               'o=' + username + '\r\n' + 's=misesion\r\n' + \
+               'o=' + username + ' ' + uas_ip + '\r\n' + 's=misesion\r\n' + \
                't=0\r\n' + 'm=audio ' + rtp_port + ' RTP\r\n'
     print('Enviando: ' + peticion)
     my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
