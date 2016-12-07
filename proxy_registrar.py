@@ -90,7 +90,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                                       time.gmtime(time.time()))
         for client in self.data_client:
             self.expire = int(self.data_client[client][-1])
-            print(self.data_client)
+            #print(self.data_client)
             now = time.time()
             #print("now", now, "expire", self.expire)
             if self.expire < now:
@@ -102,8 +102,6 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
 
     def handle(self):
         while 1:
-            IPclient = self.client_address[0]
-            PORTclient = str(self.client_address[1])
             line = self.rfile.read().decode('utf-8')
             print('El cliente nos manda: ' + line)
             if not line:
@@ -150,8 +148,10 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                     else:
                         self.wfile.write(b'SIP/2.0 404 User Not Found')
                     self.register2json()
+                    print(self.data_client)
             elif metodo == 'INVITE':
                 rtp_port = line.split()[-2]
+                print(self.data_client)
                 self.wfile.write(b'SIP/2.0 100 Trying\r\n\r\n')
                 self.wfile.write(b'SIP/2.0 180 Ring\r\n\r\n')
                 self.wfile.write(b'SIP/2.0 200 OK\r\n')
@@ -160,6 +160,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 self.wfile.write(b's=misesion\r\nt=0\r\n')
                 self.wfile.write(b'm=audio ' + bytes(rtp_port, 'utf-8'))
                 self.wfile.write(b' RTP')
+                
             elif metodo == 'ACK':
                 aEjecutar = 'mp32rtp -i ' + IP + ' -p 23032 < ' + audio_file
                 print('Vamos a ejecutar', aEjecutar)
@@ -175,5 +176,5 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
 
 # Creamos servidor de eco y escuchamos
 serv = socketserver.UDPServer((serverIP, int(serverPort)), RegisterHandler)
-print('Server BigBangServer listening at port' + serverPort + '...')
+print('Server BigBangServer listening at port ' + serverPort + '...')
 serv.serve_forever()            
