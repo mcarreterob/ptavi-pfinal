@@ -69,6 +69,6 @@ log_path = data_list[4]['log_path']
 audio_path = data_list[5]['audio_path']
 
 # Creamos servidor y escuchamos
-serv = socketserver.UDPServer((serverIP, int(serverPort)), RegisterHandler)
+serv = socketserver.UDPServer((uas_ip, int(uas_port)), RegisterHandler)
 print("Listening...")
 serv.serve_forever()

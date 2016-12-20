@@ -96,11 +96,14 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
             if self.expire < now:
                 tmpList.append(client)
         for cliente in tmpList:
+            print('ELIMINADO ' + cliente)
             del self.data_client[cliente]
-            print('ELIMINADO')
+            
         self.register2json()
 
     def handle(self):
+        self.json2registered()
+        #print("linea 105", self.data_client)
         while 1:
             line = self.rfile.read().decode('utf-8')
             print('El cliente nos manda: ' + line)
@@ -145,22 +148,36 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         self.data_client[self.user] = self.client_list
                         self.delete()
                         self.client_list = []
+                        self.wfile.write(b'SIP/2.0 200 OK\r\n')
                     else:
-                        self.wfile.write(b'SIP/2.0 404 User Not Found')
+                        self.wfile.write(b'SIP/2.0 404 User Not Found\r\n')
                     self.register2json()
-                    print(self.data_client)
+                    print('linea 154', self.data_client)
             elif metodo == 'INVITE':
+                self.json2registered()
+                user = line.split()[1].split(':')[1] # Al que mando el INVITE
                 rtp_port = line.split()[-2]
-                print(self.data_client)
-                self.wfile.write(b'SIP/2.0 100 Trying\r\n\r\n')
-                self.wfile.write(b'SIP/2.0 180 Ring\r\n\r\n')
-                self.wfile.write(b'SIP/2.0 200 OK\r\n')
-                self.wfile.write(b'Content-Type: application/sdp\r\n\r\n')
-                self.wfile.write(b'v=0\r\no=leonard@bigbang.com\r\n')
-                self.wfile.write(b's=misesion\r\nt=0\r\n')
-                self.wfile.write(b'm=audio ' + bytes(rtp_port, 'utf-8'))
-                self.wfile.write(b' RTP')
-                
+                passwd_file = open(passwd_path, 'r')
+                passwd_file1 = passwd_file.readlines()
+                for line in passwd_file1:
+                    line_slices = line.split()
+                    #print(line_slices)
+                    users = line_slices[0].split('\r\n')
+                    print(users)
+                    if line_slices[0] == users:
+                        #print(users)
+                        #print('linea 157', self.data_client)
+                        self.wfile.write(b'SIP/2.0 100 Trying\r\n\r\n')
+                        self.wfile.write(b'SIP/2.0 180 Ring\r\n\r\n')
+                        self.wfile.write(b'SIP/2.0 200 OK\r\n')
+                        self.wfile.write(b'Content-Type: application/sdp' + \
+                                         bytes('\r\n\r\n', 'utf-8'))
+                        self.wfile.write(b'v=0\r\no=leonard@bigbang.com\r\n')
+                        self.wfile.write(b's=misesion\r\nt=0\r\n')
+                        self.wfile.write(b'm=audio ' + bytes(rtp_port, 'utf-8'))
+                        self.wfile.write(b' RTP')
+                    else:
+                        self.wfile.write(b'SIP/2.0 404 User Not Found\r\n')
             elif metodo == 'ACK':
                 aEjecutar = 'mp32rtp -i ' + IP + ' -p 23032 < ' + audio_file
                 print('Vamos a ejecutar', aEjecutar)
