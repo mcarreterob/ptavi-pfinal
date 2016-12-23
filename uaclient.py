@@ -84,7 +84,7 @@ if metodo == 'REGISTER':
                ' SIP/2.0\r\n' + 'Expires: ' + opcion + '\r\n'
     print('Enviando: ' + peticion)
     my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
-    data = my_socket.recv(1024)
+    data = my_socket.recv(int(regproxy_port))
     print('Recibido -- ', data.decode('utf-8'))
     data_recibido = data.decode('utf-8').split()
     nonce = data_recibido[-1].split('=')[1]
@@ -96,7 +96,7 @@ if metodo == 'REGISTER':
         peticion = peticion + 'Authorization: Digest response=' + response
         print('Enviando: ' + peticion)
         my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
-        data = my_socket.recv(1024)
+        data = my_socket.recv(int(regproxy_port))
         print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'INVITE':
     peticion = 'INVITE sip:' + opcion + ' SIP/2.0\r\n' + \
@@ -105,19 +105,19 @@ elif metodo == 'INVITE':
                't=0\r\n' + 'm=audio ' + rtp_port + ' RTP\r\n'
     print('Enviando: ' + peticion)
     my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
-    data = my_socket.recv(1024)
+    data = my_socket.recv(int(regproxy_port))
     print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'ACK':
-    peticion = 'ACK sip:' + username + 'SIP/2.0\r\n'
+    peticion = 'ACK sip:' + username + 'SIP/2.0'
     print('Enviando: ' + peticion)
     my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
-    data = my_socket.recv(1024)
+    data = my_socket.recv(int(regproxy_port))
     print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'BYE':
-    peticion = 'BYE sip:' + opcion + ' SIP/2.0\r\n'
+    peticion = 'BYE sip:' + opcion + ' SIP/2.0'
     print('Enviando: ' + peticion)
     my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
-    data = my_socket.recv(1024)
+    data = my_socket.recv(int(regproxy_port))
     print('Recibido -- ', data.decode('utf-8'))
 
 # ENVIO
