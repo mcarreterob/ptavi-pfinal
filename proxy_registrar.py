@@ -21,11 +21,11 @@ class XMLHandler(ContentHandler):
 
     def __init__(self):
         """Inicializador de varibles. config_dic es un diccionario en el que
-            se guardaran los datos de cada etiqueta. data_list es una lista 
+            se guardaran los datos de cada etiqueta. data_list es una lista
             donde se guardaran todos los diccionarios"""
         self.config_dic = {}
         self.data_list = []
-       
+
     def startElement(self, name, attrs):
         if name == 'server':
             self.config_dic['name'] = attrs.get('name', '--')
@@ -42,7 +42,7 @@ class XMLHandler(ContentHandler):
             self.config_dic['path'] =  attrs.get('path', '--')
             self.data_list.append(self.config_dic)
             self.config_dic = {}
-            
+
     def get_data(self):
         return self.data_list
 
@@ -98,10 +98,10 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
         for cliente in tmpList:
             print('ELIMINADO ' + cliente)
             del self.data_client[cliente]
-            
         self.register2json()
 
     def handle(self):
+        """Metodo que gestiona las peticiones"""
         self.json2registered()
         #print("linea 105", self.data_client)
         while 1:
@@ -111,15 +111,14 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 break
             line_slices = line.split()
             metodo = line_slices[0]
-            #nonce = random.randint(0000, 9999)
+            nonce = random.randint(0000, 9999)
             if metodo == 'REGISTER':
                 if 'Digest' not in line_slices:
                     self.wfile.write(b'SIP/2.0 401 Unauthorized\r\n')
-                    self.wfile.write(b'WWW Authenticate: Digest nonce=45' )
-                    #self.wfile.write(bytes(nonce))
+                    self.wfile.write(b'WWW Authenticate: Digest nonce=')
+                    self.wfile.write(bytes(str(nonce), 'utf-8'))
                     self.wfile.write(b'\r\n\r\n')
                 else:
-                    self.nonce = random.randint(0000, 9999)
                     self.user = line.split()[1].split(':')[1]
                     self.port = line.split()[1].split(':')[2]
                     hresponse = line.split()[-1].split('=')[1]
@@ -132,7 +131,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         if line_slices[0] == self.user:
                             password = word[0].split('=')[1]
                     m = hashlib.sha1()
-                    m.update(bytes(self.nonce, 'utf-8'))
+                    m.update(bytes(nonce, 'utf-8'))
                     m.update(bytes(password, 'utf-8'))
                     response_comparation = m.hexdigest()
                     if response_comparation == hresponse:
@@ -151,7 +150,6 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         self.wfile.write(b'SIP/2.0 200 OK\r\n')
 
                     self.register2json()
-                    #print('linea 154', self.data_client)
             elif metodo == 'INVITE':
                 self.json2registered()
                 user = line.split()[1].split(':')[1] # Al que mando el INVITE
@@ -166,27 +164,29 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                                          socket.SO_REUSEADDR, 1)
                     my_socket.connect((IPserver, int(PORTserver)))
                     my_socket.send(bytes(line, 'utf-8') + b'\r\n')
-                    data = my_socket.recv(int(PORTserver))
+                    data = my_socket.recv(int(serverPort))
+                    datos_recibidos = data.decode('utf-8')
                     print('Recibido -- ', data.decode('utf-8'))
-                    '''self.wfile.write(b'SIP/2.0 100 Trying\r\n\r\n')
-                    self.wfile.write(b'SIP/2.0 180 Ring\r\n\r\n')
-                    self.wfile.write(b'SIP/2.0 200 OK\r\n')
-                    self.wfile.write(b'Content-Type: application/sdp' + \
-                                     bytes('\r\n\r\n', 'utf-8'))
-                    self.wfile.write(b'v=0\r\no=leonard@bigbang.com\r\n')
-                    self.wfile.write(b's=misesion\r\nt=0\r\n')
-                    self.wfile.write(b'm=audio ' + bytes(rtp_port, 'utf-8'))
-                    self.wfile.write(b' RTP')'''
+                    self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
+                    print('(SE LO REENVIO AL CLIENTE QUE HA HECHO EL INVITE)')
                 else:
                     self.wfile.write(b'SIP/2.0 404 User Not Found\r\n')
             elif metodo == 'ACK':
+                self.json2registered()
                 user = line.split()[1].split(':')[1] # Al que mando el ACK
+                IPserver = self.data_client[user][0] # IP destino
+                PORTserver = self.data_client[user][1] # Puerto destino
                 my_socket = socket.socket(socket.AF_INET,
                                           socket.SOCK_DGRAM)
                 my_socket.setsockopt(socket.SOL_SOCKET,
                                      socket.SO_REUSEADDR, 1)
                 my_socket.connect((IPserver, int(PORTserver)))
                 my_socket.send(bytes(line, 'utf-8') + b'\r\n')
+                data = my_socket.recv(int(serverPort))
+                datos_recibidos = data.decode('utf-8')
+                print('Recibido -- ', data.decode('utf-8'))
+                self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
+                print('(SE LO REENVIO AL CLIENTE)')
             elif metodo == 'BYE':
                 self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
             elif metodo != 'REGISTER' or 'INVITE' or 'ACK' or 'BYE':
@@ -194,8 +194,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
             else:
                 self.wfile.write(b'SIP/2.0 400 Bad Request')
 
-
 # Creamos servidor de eco y escuchamos
 serv = socketserver.UDPServer((serverIP, int(serverPort)), RegisterHandler)
 print('Server BigBangServer listening at port ' + serverPort + '...')
-serv.serve_forever()            
+serv.serve_forever()

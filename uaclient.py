@@ -6,6 +6,7 @@ import sys
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 import hashlib
+import os
 
 try:
     config = sys.argv[1]
@@ -71,7 +72,7 @@ rtp_port = data_list[2]['rtp_port']
 regproxy_IP = data_list[3]['reg_ip']
 regproxy_port = data_list[3]['reg_port']
 log_path = data_list[4]['log_path']
-audio_path = data_list[5]['audio_path']
+audio_file = data_list[5]['audio_path']
 
 # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
 
@@ -107,25 +108,24 @@ elif metodo == 'INVITE':
     my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
     data = my_socket.recv(int(regproxy_port))
     print('Recibido -- ', data.decode('utf-8'))
-elif metodo == 'ACK':
-    peticion = 'ACK sip:' + username + 'SIP/2.0'
-    print('Enviando: ' + peticion)
-    my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
-    data = my_socket.recv(int(regproxy_port))
-    print('Recibido -- ', data.decode('utf-8'))
+    slices = data.decode('utf-8').split()
+    if slices[1] == '100' and slices[4] == '180' and slices[7] == '200':
+        metodo == 'ACK'
+        peticion = 'ACK sip:' + opcion + ' SIP/2.0'
+        ip_destino = slices[13] # destino del RTP
+        port_destino = slices[17] # destino del RTP
+        print('Enviando: ' + peticion)
+        my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+        aEjecutar = 'mp32rtp -i ' + ip_destino + ' -p ' + port_destino
+        aEjecutar += ' < ' + audio_file
+        print('Vamos a ejecutar', aEjecutar)
+        os.system(aEjecutar)
+        print('Finished transfer')
+        data = my_socket.recv(int(port_destino))
+        print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'BYE':
     peticion = 'BYE sip:' + opcion + ' SIP/2.0'
     print('Enviando: ' + peticion)
     my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
     data = my_socket.recv(int(regproxy_port))
     print('Recibido -- ', data.decode('utf-8'))
-
-# ENVIO
-
-#print('Enviando: ' + peticion)
-#my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
-#data = my_socket.recv(1024)
-#data_recibido = data.decode('utf-8').split()
-#nonce = data_recibido[-1].split('=')[1]
-
-#print('Recibido -- ', data.decode('utf-8'))
