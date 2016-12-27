@@ -67,8 +67,8 @@ uas_port = data_list[1]['uas_port']
 rtp_port = data_list[2]['rtp_port']
 regproxy_IP = data_list[3]['reg_ip']
 regproxy_port = data_list[3]['reg_port']
-log_path = data_list[4]['log_path']
-audio_path = data_list[5]['audio_path']
+log_file = data_list[4]['log_path']
+audio_file = data_list[5]['audio_path']
 
 
 class EchoHandler(socketserver.DatagramRequestHandler):
@@ -105,7 +105,7 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 print('me esta llegando ', line)
                 peticion = 'ACK sip:' + self.rtp_list[0] + ' SIP/2.0'
                 self.wfile.write(bytes(peticion, 'utf-8'))
-                aEjecutar = 'mp32rtp -i ' + self.retpp_list[1] + ' -p '
+                aEjecutar = 'mp32rtp -i ' + self.rtp_list[1] + ' -p '
                 aEjecutar += self.rtp_list[2] + ' < ' + audio_file
                 print('Vamos a ejecutar', aEjecutar)
                 os.system(aEjecutar)
