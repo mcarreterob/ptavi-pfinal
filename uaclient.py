@@ -71,7 +71,7 @@ uas_port = data_list[1]['uas_port']
 rtp_port = data_list[2]['rtp_port']
 regproxy_IP = data_list[3]['reg_ip']
 regproxy_port = data_list[3]['reg_port']
-log_path = data_list[4]['log_path']
+log_file = data_list[4]['log_path']
 audio_file = data_list[5]['audio_path']
 
 # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
