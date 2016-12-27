@@ -186,9 +186,21 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 datos_recibidos = data.decode('utf-8')
                 print('Recibido -- ', data.decode('utf-8'))
                 self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
-                print('(SE LO REENVIO AL CLIENTE)')
             elif metodo == 'BYE':
-                self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
+                self.json2registered()
+                user = line.split()[1].split(':')[1] # Al que mando el BYE
+                IPserver = self.data_client[user][0] # IP destino
+                PORTserver = self.data_client[user][1] # Puerto destino
+                my_socket = socket.socket(socket.AF_INET,
+                                          socket.SOCK_DGRAM)
+                my_socket.setsockopt(socket.SOL_SOCKET,
+                                     socket.SO_REUSEADDR, 1)
+                my_socket.connect((IPserver, int(PORTserver)))
+                my_socket.send(bytes(line, 'utf-8') + b'\r\n')
+                data = my_socket.recv(int(serverPort))
+                datos_recibidos = data.decode('utf-8')
+                print('Recibido -- ', data.decode('utf-8'))
+                self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
             elif metodo != 'REGISTER' or 'INVITE' or 'ACK' or 'BYE':
                 self.wfile.write(b'SIP/2.0 405 Method Not Allowed\r\n\r\n')
             else:

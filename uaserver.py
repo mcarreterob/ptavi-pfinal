@@ -6,6 +6,7 @@ import socketserver
 import sys
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
+import os
 
 try:
     config = sys.argv[1]
