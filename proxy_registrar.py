@@ -65,6 +65,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
     Echo server class
     """
     data_client = {} # Diccionario de clientes registrados
+    nonce = []
 
     def register2json(self):
         """Metodo con el que cada vez que un usuario se registre o se de
@@ -111,13 +112,12 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 break
             line_slices = line.split()
             metodo = line_slices[0]
-            nonce = random.randint(0000, 9999)
             if metodo == 'REGISTER':
                 if 'Digest' not in line_slices:
-                    self.wfile.write(b'SIP/2.0 401 Unauthorized\r\n')
-                    self.wfile.write(b'WWW Authenticate: Digest nonce=')
-                    self.wfile.write(bytes(str(nonce), 'utf-8'))
-                    self.wfile.write(b'\r\n\r\n')
+                    self.nonce.append(str(random.randint(0000, 9999)))
+                    self.wfile.write(bytes('SIP/2.0 401 Unauthorized\r\n' +
+                                           'WWW Authenticate: Digest nonce=' +
+                                           self.nonce[0] + '\r\n\r\n', 'utf-8'))
                 else:
                     self.user = line.split()[1].split(':')[1]
                     self.port = line.split()[1].split(':')[2]
@@ -131,7 +131,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         if line_slices[0] == self.user:
                             password = word[0].split('=')[1]
                     m = hashlib.sha1()
-                    m.update(bytes(str(nonce), 'utf-8'))
+                    m.update(bytes(self.nonce[0], 'utf-8'))
                     m.update(bytes(password, 'utf-8'))
                     response_comparation = m.hexdigest()
                     if response_comparation == hresponse:
@@ -148,7 +148,6 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         self.delete()
                         self.client_list = []
                         self.wfile.write(b'SIP/2.0 200 OK\r\n')
-
                     self.register2json()
             elif metodo == 'INVITE':
                 self.json2registered()
@@ -168,7 +167,6 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                     datos_recibidos = data.decode('utf-8')
                     print('Recibido -- ', data.decode('utf-8'))
                     self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
-                    print('(SE LO REENVIO AL CLIENTE QUE HA HECHO EL INVITE)')
                 else:
                     self.wfile.write(b'SIP/2.0 404 User Not Found\r\n')
             elif metodo == 'ACK':

@@ -88,8 +88,8 @@ if metodo == 'REGISTER':
     data = my_socket.recv(int(regproxy_port))
     print('Recibido -- ', data.decode('utf-8'))
     data_recibido = data.decode('utf-8').split()
-    nonce = data_recibido[-1].split('=')[1]
     if data_recibido[1] == '401':
+        nonce = data_recibido[-1].split('=')[1]
         m = hashlib.sha1()
         m.update(bytes(nonce, 'utf-8'))
         m.update(bytes(password, 'utf-8'))
