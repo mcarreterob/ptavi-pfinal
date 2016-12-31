@@ -131,7 +131,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         if line_slices[0] == self.user:
                             password = word[0].split('=')[1]
                     m = hashlib.sha1()
-                    m.update(bytes(nonce, 'utf-8'))
+                    m.update(bytes(str(nonce), 'utf-8'))
                     m.update(bytes(password, 'utf-8'))
                     response_comparation = m.hexdigest()
                     if response_comparation == hresponse:
