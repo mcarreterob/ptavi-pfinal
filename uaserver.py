@@ -109,7 +109,7 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 self.wfile.write(bytes(peticion, 'utf-8'))
                 aEjecutar = 'mp32rtp -i ' + self.rtp_list[1] + ' -p '
                 aEjecutar += self.rtp_list[2] + ' < ' + audio_file
-                vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino
+                vlc = 'cvlc rtp://@' + self.rtp_list[1] + ':' + self.rtp_list[2] + '2> /dev/null &'
                 print('Vamos a ejecutar', aEjecutar)
                 os.system(aEjecutar)
                 print(vlc)
