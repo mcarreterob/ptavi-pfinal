@@ -109,8 +109,11 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 self.wfile.write(bytes(peticion, 'utf-8'))
                 aEjecutar = 'mp32rtp -i ' + self.rtp_list[1] + ' -p '
                 aEjecutar += self.rtp_list[2] + ' < ' + audio_file
+                vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino
                 print('Vamos a ejecutar', aEjecutar)
                 os.system(aEjecutar)
+                print(vlc)
+                os.system(vlc)
                 print('Finished transfer')
             elif metodo == 'BYE':
                 self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
