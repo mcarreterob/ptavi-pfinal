@@ -81,32 +81,40 @@ my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 my_socket.connect((regproxy_IP, int(regproxy_port)))
 
 if metodo == 'REGISTER':
-    peticion = 'REGISTER sip:' + username + ':' + uas_port + \
-               ' SIP/2.0\r\n' + 'Expires: ' + opcion + '\r\n'
-    print('Enviando: ' + peticion)
-    my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
-    data = my_socket.recv(int(regproxy_port))
-    print('Recibido -- ', data.decode('utf-8'))
-    data_recibido = data.decode('utf-8').split()
-    if data_recibido[1] == '401':
-        nonce = data_recibido[-1].split('=')[1]
-        m = hashlib.sha1()
-        m.update(bytes(nonce, 'utf-8'))
-        m.update(bytes(password, 'utf-8'))
-        response = m.hexdigest()
-        peticion = peticion + 'Authorization: Digest response=' + response
+    try:
+        peticion = 'REGISTER sip:' + username + ':' + uas_port + \
+                   ' SIP/2.0\r\n' + 'Expires: ' + opcion + '\r\n'
         print('Enviando: ' + peticion)
-        my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+        my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
         data = my_socket.recv(int(regproxy_port))
         print('Recibido -- ', data.decode('utf-8'))
+        data_recibido = data.decode('utf-8').split()
+        if data_recibido[1] == '401':
+            nonce = data_recibido[-1].split('=')[1]
+            m = hashlib.sha1()
+            m.update(bytes(nonce, 'utf-8'))
+            m.update(bytes(password, 'utf-8'))
+            response = m.hexdigest()
+            peticion = peticion + 'Authorization: Digest response=' + response
+            print('Enviando: ' + peticion)
+            my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+            data = my_socket.recv(int(regproxy_port))
+            print('Recibido -- ', data.decode('utf-8'))
+    except socket.error:
+        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + \
+                 regproxy_port)
 elif metodo == 'INVITE':
     peticion = 'INVITE sip:' + opcion + ' SIP/2.0\r\n' + \
                'Content-Type: application/sdp\r\n\r\n' + 'v=0\r\n' + \
                'o=' + username + ' ' + uas_ip + '\r\n' + 's=misesion\r\n' + \
                't=0\r\n' + 'm=audio ' + rtp_port + ' RTP\r\n'
     print('Enviando: ' + peticion)
-    my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
-    data = my_socket.recv(int(regproxy_port))
+    try:
+        my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
+        data = my_socket.recv(int(regproxy_port))
+    except socket.error:
+        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + \
+                 regproxy_port)
     print('Recibido -- ', data.decode('utf-8'))
     slices = data.decode('utf-8').split()
     if slices[1] == '100' and slices[4] == '180' and slices[7] == '200':
@@ -115,17 +123,25 @@ elif metodo == 'INVITE':
         ip_destino = slices[13] # destino del RTP
         port_destino = slices[17] # destino del RTP
         print('Enviando: ' + peticion)
-        my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
-        aEjecutar = 'mp32rtp -i ' + ip_destino + ' -p ' + port_destino
-        aEjecutar += ' < ' + audio_file
-        print('Vamos a ejecutar', aEjecutar)
-        os.system(aEjecutar)
-        print('Finished transfer')
-        data = my_socket.recv(int(port_destino))
+        try:
+            my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+            aEjecutar = 'mp32rtp -i ' + ip_destino + ' -p ' + port_destino
+            aEjecutar += ' < ' + audio_file
+            print('Vamos a ejecutar', aEjecutar)
+            os.system(aEjecutar)
+            print('Finished transfer')
+            data = my_socket.recv(int(port_destino))
+        except socket.error:
+            sys.exit('Error: No server listening at ' + ip_destino + \
+                     ' port ' + port_destino)
         print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'BYE':
     peticion = 'BYE sip:' + opcion + ' SIP/2.0'
     print('Enviando: ' + peticion)
-    my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
-    data = my_socket.recv(int(regproxy_port))
+    try:
+        my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+        data = my_socket.recv(int(regproxy_port))
+    except socket.error:
+        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + \
+                 regproxy_port)
     print('Recibido -- ', data.decode('utf-8'))

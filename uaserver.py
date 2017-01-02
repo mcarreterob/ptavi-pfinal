@@ -92,9 +92,10 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 self.wfile.write(b'SIP/2.0 100 Trying\r\n\r\n')
                 self.wfile.write(b'SIP/2.0 180 Ring\r\n\r\n')
                 self.wfile.write(b'SIP/2.0 200 OK\r\n')
-                peticion = 'Content-Type: application/sdp\r\n\r\n' + 'v=0\r\n' + \
-                           'o=' + username + ' ' + uas_ip + '\r\n' + 's=misesion\r\n' + \
-                           't=0\r\n' + 'm=audio ' + rtp_port + ' RTP\r\n'
+                peticion = 'Content-Type: application/sdp\r\n\r\n' + \
+                           'v=0\r\n' + 'o=' + username + ' ' + uas_ip + \
+                           '\r\n' + 's=misesion\r\n' + 't=0\r\n' + \
+                           'm=audio ' + rtp_port + ' RTP\r\n'
                 self.wfile.write(bytes(peticion, 'utf-8'))
                 self.rtp_user = line_slices[6].split('=')[1]
                 self.rtp_list.append(self.rtp_user)
@@ -119,6 +120,9 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 self.wfile.write(b'SIP/2.0 400 Bad Request')
 
 # Creamos servidor y escuchamos
-serv = socketserver.UDPServer((uas_ip, int(uas_port)), EchoHandler)
-print("Listening...")
-serv.serve_forever()
+try:
+    serv = socketserver.UDPServer((uas_ip, int(uas_port)), EchoHandler)
+    print("Listening...")
+    serv.serve_forever()
+except KeyboardInterrupt:
+    sys.exit('\r\nFinished server')
