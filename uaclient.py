@@ -127,7 +127,7 @@ elif metodo == 'INVITE':
             my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
             aEjecutar = 'mp32rtp -i ' + ip_destino + ' -p ' + port_destino
             aEjecutar += ' < ' + audio_file
-            vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino
+            vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino + '2> /dev/null &'
             print('Vamos a ejecutar', aEjecutar)
             os.system(aEjecutar)
             print(vlc)
