@@ -107,11 +107,11 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 print('me esta llegando ', line)
                 peticion = 'ACK sip:' + self.rtp_list[0] + ' SIP/2.0'
                 self.wfile.write(bytes(peticion, 'utf-8'))
-                aEjecutar = 'mp32rtp -i ' + self.rtp_list[1] + ' -p '
+                aEjecutar = './mp32rtp -i ' + self.rtp_list[1] + ' -p '
                 aEjecutar += self.rtp_list[2] + ' < ' + audio_file
                 vlc = 'cvlc rtp://@' + self.rtp_list[1] + ':' + \
-                        self.rtp_list[2] + ' 2>/dev/null'
-                print(vlc)
+                        self.rtp_list[2] + ' 2> /dev/null'
+                print('Vamos a ejecutar', vlc)
                 os.system(vlc)
                 print('Vamos a ejecutar', aEjecutar)
                 os.system(aEjecutar)
