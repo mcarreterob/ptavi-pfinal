@@ -59,6 +59,14 @@ database_path = data_list[1]['path']
 passwd_path = data_list[1]['passwdpath']
 log_path = data_list[2]['path']
 
+def makeLog(log_file, hora, evento_log):
+    fichero = open(log_file, 'a')
+    hora = time.gmtime(time.time())
+    fichero.write(time.strftime('%Y-%m-%d %H:%M:%S', hora))
+    evento_log = evento_log.replace('\r\n', ' ')
+    fichero.write(evento_log + '\r\n')
+    fichero.close()
+
 
 class RegisterHandler(socketserver.DatagramRequestHandler):
     """
@@ -115,9 +123,10 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
             if metodo == 'REGISTER':
                 if 'Digest' not in line_slices:
                     self.nonce.append(str(random.randint(0000, 9999)))
-                    self.wfile.write(bytes('SIP/2.0 401 Unauthorized\r\n' +
-                                           'WWW Authenticate: Digest nonce=' +
-                                           self.nonce[0] + '\r\n\r\n', 'utf-8'))
+                    respuesta = 'SIP/2.0 401 Unauthorized\r\n' +
+                                'WWW Authenticate: Digest nonce=' +
+                                 self.nonce[0] + '\r\n\r\n'
+                    self.wfile.write(bytes(respuesta, 'utf-8'))
                 else:
                     self.user = line.split()[1].split(':')[1]
                     self.port = line.split()[1].split(':')[2]
@@ -167,14 +176,40 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         data = my_socket.recv(int(serverPort))
                         datos_recibidos = data.decode('utf-8')
                         print('Recibido -- ', data.decode('utf-8'))
-                        self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
+                        self.wfile.write(bytes(datos_recibidos, 'utf-8') + \
+                                         b'\r\n')
                     except socket.error:
                         error = 'Error: No server listening at ' + \
                                   IPserver + ' port ' + PORTserver
                         self.wfile.write(bytes(error, 'utf-8'))
+                        # START_LOG
+                        evento_log = ' Sent to ' + self.client_address[0] + \
+                                     ':' + self.client_address[1] + ': ' + \
+                                     error
+                        hora =  time.time()
+                        makeLog(log_file, hora, evento_log)
+                        # END_LOG
                 else:
+                    # START_LOG
+                    evento_log = ' Received from ' + self.client_address[0] + \
+                                 ':' + self.client_address[1] + ':' + line
+                    hora =  time.time()
+                    makeLog(log_file, hora, evento_log)
+                    # END_LOG
                     self.wfile.write(b'SIP/2.0 404 User Not Found\r\n')
+                    # START_LOG
+                    evento_log = ' Sent to ' + self.client_address[0] + ':' + \
+                                 self.client_address[1] + ': ' + line
+                    hora =  time.time()
+                    makeLog(log_file, hora, evento_log)
+                    # END_LOG
             elif metodo == 'ACK':
+                # START_LOG
+                evento_log = ' Received from ' + self.client_address[0] + \
+                             ':' + self.client_address[1] + ':' + line
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
                 self.json2registered()
                 user = line.split()[1].split(':')[1] # Al que mando el ACK
                 IPserver = self.data_client[user][0] # IP destino
@@ -185,11 +220,35 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                                      socket.SO_REUSEADDR, 1)
                 my_socket.connect((IPserver, int(PORTserver)))
                 my_socket.send(bytes(line, 'utf-8') + b'\r\n')
+                # START_LOG
+                evento_log = ' Sent to ' + IPserver + ':' + PORTserver + \
+                             ': ' + line
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
                 data = my_socket.recv(int(serverPort))
+                # START_LOG
+                evento_log = ' Received from ' + IPserver + ':' + \
+                             PORTserver + ':' + line
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
                 datos_recibidos = data.decode('utf-8')
                 print('Recibido -- ', data.decode('utf-8'))
                 self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
+                # START_LOG
+                evento_log = ' Sent to ' + self.client_address[0] + ':' + \
+                             self.client_address[1] + ': ' + line
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
             elif metodo == 'BYE':
+                # START_LOG
+                evento_log = ' Received from ' + self.client_address[0] + \
+                             ':' + self.client_address[1] + ':' + line
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
                 self.json2registered()
                 user = line.split()[1].split(':')[1] # Al que mando el BYE
                 IPserver = self.data_client[user][0] # IP destino
@@ -200,19 +259,73 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                                      socket.SO_REUSEADDR, 1)
                 my_socket.connect((IPserver, int(PORTserver)))
                 my_socket.send(bytes(line, 'utf-8') + b'\r\n')
+                # START_LOG
+                evento_log = ' Sent to ' + IPserver + ':' + PORTserver + \
+                             ': ' + line
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
                 data = my_socket.recv(int(serverPort))
+                # START_LOG
+                evento_log = ' Received from ' + IPserver + ':' + \
+                             PORTserver + ':' + line
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
                 datos_recibidos = data.decode('utf-8')
                 print('Recibido -- ', data.decode('utf-8'))
                 self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
+                # START_LOG
+                evento_log = ' Sent to ' + self.client_address[0] + ':' + \
+                             self.client_address[1] + ': ' + respuesta
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
             elif metodo != 'REGISTER' or 'INVITE' or 'ACK' or 'BYE':
-                self.wfile.write(b'SIP/2.0 405 Method Not Allowed\r\n\r\n')
+                # START_LOG
+                evento_log = ' Received from ' + self.client_address[0] + \
+                             ':' + self.client_address[1] + ':' + line
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
+                respuesta = 'SIP/2.0 405 Method Not Allowed\r\n\r\n'
+                self.wfile.write(bytes(respuesta, 'utf-8'))
+                # START_LOG
+                evento_log = ' Sent to ' + self.client_address[0] + ':' + \
+                             self.client_address[1] + ': ' + respuesta
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
             else:
-                self.wfile.write(b'SIP/2.0 400 Bad Request')
+                # START_LOG
+                evento_log = ' Received from ' + self.client_address[0] + \
+                             ':' + self.client_address[1] + ':' + line
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
+                respuesta = 'SIP/2.0 400 Bad Request\r\n\r\n'
+                self.wfile.write(bytes(respuesta, 'utf-8'))
+                # START_LOG
+                evento_log = ' Sent to ' + self.client_address[0] + ':' + \
+                             self.client_address[1] + ': ' + respuesta
+                hora =  time.time()
+                makeLog(log_file, hora, evento_log)
+                # END_LOG
 
 # Creamos servidor de eco y escuchamos
+# START_LOG
+evento_log = ' Starting...'
+hora =  time.time()
+makeLog(log_file, hora, evento_log)
+# END_LOG
 try:
     serv = socketserver.UDPServer((serverIP, int(serverPort)), RegisterHandler)
     print('Server BigBangServer listening at port ' + serverPort + '...')
     serv.serve_forever()
 except KeyboardInterrupt:
     sys.exit('\r\nFinished BigBangServer')
+# START_LOG
+evento_log = ' Finishing.'
+hora =  time.time()
+makeLog(log_file, hora, evento_log)
+# END_LOG
