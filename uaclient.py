@@ -7,6 +7,7 @@ from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 import hashlib
 import os
+import time
 
 try:
     config = sys.argv[1]
@@ -74,11 +75,25 @@ regproxy_port = data_list[3]['reg_port']
 log_file = data_list[4]['log_path']
 audio_file = data_list[5]['audio_path']
 
+def makeLog(log_file, hora, evento_log):
+    fichero = open(log_file, 'a')
+    hora = time.gmtime(time.time())
+    fichero.write(time.strftime('%Y-%m-%d %H:%M:%S', hora))
+    evento_log = evento_log.replace('\r\n', ' ')
+    fichero.write(evento_log + '\r\n')
+    fichero.close()
+
 # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
 
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 my_socket.connect((regproxy_IP, int(regproxy_port)))
+
+# START_LOG
+evento_log = ' Starting...'
+hora =  time.time()
+makeLog(log_file, hora, evento_log)
+# END_LOG
 
 if metodo == 'REGISTER':
     try:
@@ -86,7 +101,19 @@ if metodo == 'REGISTER':
                    ' SIP/2.0\r\n' + 'Expires: ' + opcion + '\r\n'
         print('Enviando: ' + peticion)
         my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
+        # START_LOG
+        evento_log = ' Sent to ' + regproxy_IP + ':' + \
+                     regproxy_port + ': ' + peticion
+        hora =  time.time()
+        makeLog(log_file, hora, evento_log)
+        # END_LOG
         data = my_socket.recv(int(regproxy_port))
+        # START_LOG
+        evento_log = ' Received from ' + regproxy_IP + ':' + \
+                      regproxy_port + ':' + line
+        hora =  time.time()
+        makeLog(log_file, hora, evento_log)
+        # END_LOG
         print('Recibido -- ', data.decode('utf-8'))
         data_recibido = data.decode('utf-8').split()
         if data_recibido[1] == '401':
@@ -98,11 +125,29 @@ if metodo == 'REGISTER':
             peticion = peticion + 'Authorization: Digest response=' + response
             print('Enviando: ' + peticion)
             my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+            # START_LOG
+            evento_log = ' Sent to ' + regproxy_IP + ':' + \
+                         regproxy_port + ': ' + peticion
+            hora =  time.time()
+            makeLog(log_file, hora, evento_log)
+            # END_LOG
             data = my_socket.recv(int(regproxy_port))
+            # START_LOG
+            evento_log = ' Received from ' + regproxy_IP + ':' + \
+                          regproxy_port + ':' + line
+            hora =  time.time()
+            makeLog(log_file, hora, evento_log)
+            # END_LOG
             print('Recibido -- ', data.decode('utf-8'))
     except socket.error:
         sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + \
                  regproxy_port)
+        # START_LOG
+        evento_log = 'Error: No server listening at ' + regproxy_IP + \
+                     ' port ' + regproxy_port
+        hora =  time.time()
+        makeLog(log_file, hora, evento_log)
+        # END_LOG
 elif metodo == 'INVITE':
     peticion = 'INVITE sip:' + opcion + ' SIP/2.0\r\n' + \
                'Content-Type: application/sdp\r\n\r\n' + 'v=0\r\n' + \
@@ -111,10 +156,28 @@ elif metodo == 'INVITE':
     print('Enviando: ' + peticion)
     try:
         my_socket.send(bytes(peticion, 'utf-8') + b'\r\n')
+        # START_LOG
+        evento_log = ' Sent to ' + regproxy_IP + ':' + \
+                     regproxy_port + ': ' + peticion
+        hora =  time.time()
+        makeLog(log_file, hora, evento_log)
+        # END_LOG
         data = my_socket.recv(int(regproxy_port))
+        # START_LOG
+        evento_log = ' Received from ' + regproxy_IP + ':' + \
+                      regproxy_port + ':' + line
+        hora =  time.time()
+        makeLog(log_file, hora, evento_log)
+        # END_LOG
     except socket.error:
         sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + \
                  regproxy_port)
+        # START_LOG
+        evento_log = 'Error: No server listening at ' + regproxy_IP + \
+                     ' port ' + regproxy_port
+        hora =  time.time()
+        makeLog(log_file, hora, evento_log)
+        # END_LOG
     print('Recibido -- ', data.decode('utf-8'))
     slices = data.decode('utf-8').split()
     if slices[1] == '100' and slices[4] == '180' and slices[7] == '200':
@@ -125,27 +188,76 @@ elif metodo == 'INVITE':
         print('Enviando: ' + peticion)
         try:
             my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+            # START_LOG
+            evento_log = ' Sent to ' + regproxy_IP + ':' + \
+                         regproxy_port + ': ' + peticion
+            hora =  time.time()
+            makeLog(log_file, hora, evento_log)
+            # END_LOG
             aEjecutar = './mp32rtp -i ' + ip_destino + ' -p ' + port_destino
             aEjecutar += ' < ' + audio_file
             #vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino + \
             #       ' 2> /dev/null'
             #print(vlc)
-           # os.system(vlc)
+            #os.system(vlc)
             print('Vamos a ejecutar', aEjecutar)
             os.system(aEjecutar)
+            # START_LOG
+            evento_log = ' Sending to ' + ip_destino + ':' + \
+                          port_destino + ':' + 'audio_file'
+            hora =  time.time()
+            makeLog(log_file, hora, evento_log)
+            # END_LOG
             print('Finished transfer')
             data = my_socket.recv(int(port_destino))
+            # START_LOG
+            evento_log = ' Finished audio transfer to ' + \
+                         self.rtp_list[1] + ':' + self.rtp_list[2] + \
+                         ':' + 'audio_file'
+            hora =  time.time()
+            makeLog(log_file, hora, evento_log)
+            # END_LOG
         except socket.error:
             sys.exit('Error: No server listening at ' + ip_destino + \
                      ' port ' + port_destino)
+            # START_LOG
+            evento_log = 'Error: No server listening at ' + regproxy_IP + \
+                         ' port ' + regproxy_port
+            hora =  time.time()
+            makeLog(log_file, hora, evento_log)
+            # END_LOG
         print('Recibido -- ', data.decode('utf-8'))
 elif metodo == 'BYE':
     peticion = 'BYE sip:' + opcion + ' SIP/2.0'
     print('Enviando: ' + peticion)
     try:
         my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
+        # START_LOG
+        evento_log = ' Sent to ' + regproxy_IP + ':' + \
+                     regproxy_port + ': ' + peticion
+        hora =  time.time()
+        makeLog(log_file, hora, evento_log)
+        # END_LOG
         data = my_socket.recv(int(regproxy_port))
+        # START_LOG
+        evento_log = ' Received from ' + regproxy_IP + ':' + \
+                      regproxy_port + ':' + line
+        hora =  time.time()
+        makeLog(log_file, hora, evento_log)
+        # END_LOG
     except socket.error:
         sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + \
                  regproxy_port)
+        # START_LOG
+        evento_log = 'Error: No server listening at ' + regproxy_IP + \
+                     ' port ' + regproxy_port
+        hora =  time.time()
+        makeLog(log_file, hora, evento_log)
+        # END_LOG
     print('Recibido -- ', data.decode('utf-8'))
+
+# START_LOG
+evento_log = ' Finishing.'
+hora =  time.time()
+makeLog(log_file, hora, evento_log)
+# END_LOG
