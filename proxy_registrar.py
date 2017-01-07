@@ -173,7 +173,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         self.wfile.write(b'SIP/2.0 200 OK\r\n')
                         evento_log = ' Sent to ' + self.client_address[0] + \
                                      ':' + str(self.port) + ': ' + \
-                                     'SIP/2.0 200 OK\r\n'
+                                     'SIP/2.0 200 OK\r\n\r\n'
                         hora = time.gmtime(time.time())
                         makeLog(log_file, hora, evento_log)
                     self.register2json()
@@ -195,7 +195,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         my_socket.setsockopt(socket.SOL_SOCKET,
                                              socket.SO_REUSEADDR, 1)
                         my_socket.connect((IPserver, int(PORTserver)))
-                        my_socket.send(bytes(line, 'utf-8') + b'\r\n')
+                        my_socket.send(bytes(line, 'utf-8'))
                         evento_log = ' Sent to ' + IPserver + ':' + \
                                       PORTserver + ': ' + line
                         hora = time.gmtime(time.time())
@@ -242,7 +242,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 my_socket.setsockopt(socket.SOL_SOCKET,
                                      socket.SO_REUSEADDR, 1)
                 my_socket.connect((IPserver, int(PORTserver)))
-                my_socket.send(bytes(line, 'utf-8') + b'\r\n')
+                my_socket.send(bytes(line, 'utf-8'))
                 evento_log = ' Sent to ' + IPserver + ': ' + PORTserver + \
                              ': ' + line
                 hora = time.gmtime(time.time())
@@ -273,7 +273,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 my_socket.setsockopt(socket.SOL_SOCKET,
                                      socket.SO_REUSEADDR, 1)
                 my_socket.connect((IPserver, int(PORTserver)))
-                my_socket.send(bytes(line, 'utf-8') + b'\r\n')
+                my_socket.send(bytes(line, 'utf-8'))
                 evento_log = ' Sent to ' + IPserver + ': ' + PORTserver + \
                              ': ' + line
                 hora = time.gmtime(time.time())
@@ -285,7 +285,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
                 print('Recibido -- ', data.decode('utf-8'))
-                self.wfile.write(bytes(datos_recibidos, 'utf-8') + b'\r\n')
+                self.wfile.write(bytes(datos_recibidos, 'utf-8'))
                 evento_log = ' Sent to ' + self.client_address[0] + ':' + \
                              str(self.client_address[1]) + ': ' + \
                              datos_recibidos
