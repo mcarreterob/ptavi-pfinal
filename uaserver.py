@@ -129,7 +129,7 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 #vlc = 'cvlc rtp://@' + self.rtp_list[1] + ':' + \
                 #        self.rtp_list[2] + ' 2> /dev/null'
                 #print('Vamos a ejecutar', vlc)
-                os.system(vlc)
+                #os.system(vlc)
                 aEjecutar = './mp32rtp -i ' + self.rtp_list[1] + ' -p '
                 aEjecutar += self.rtp_list[2] + ' < ' + audio_file
                 evento_log = ' Sending to ' + self.rtp_list[1] + ':' + \
