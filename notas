@@ -1,0 +1,3 @@
+1. He implementado el reestablecimiento de usuarios conectados a traves de la
+lectura del fichero base de datos("por obligacion", el diccionario de clientes
+se vaciaba con cada peticion nueva y no se encontro donde estaba el error).
