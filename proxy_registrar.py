@@ -133,7 +133,8 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                                  self.nonce[0] + '\r\n\r\n'
                     self.wfile.write(bytes(respuesta, 'utf-8'))
                     evento_log = ' Sent to ' + self.client_address[0] + ':' + \
-                                  str(self.client_address[1]) + ': ' + respuesta
+                                  str(self.client_address[1]) + ': ' + \
+                                  respuesta
                     hora = time.gmtime(time.time())
                     makeLog(log_file, hora, evento_log)
                 else:
@@ -170,7 +171,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         self.data_client[self.user] = self.client_list
                         self.delete()
                         self.client_list = []
-                        self.wfile.write(b'SIP/2.0 200 OK\r\n')
+                        self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
                         evento_log = ' Sent to ' + self.client_address[0] + \
                                      ':' + str(self.port) + ': ' + \
                                      'SIP/2.0 200 OK\r\n\r\n'
