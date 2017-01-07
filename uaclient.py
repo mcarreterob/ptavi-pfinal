@@ -132,7 +132,7 @@ if metodo == 'REGISTER':
             makeLog(log_file, hora, evento_log)
             print('Recibido -- ', data.decode('utf-8'))
     except socket.error:
-        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + 
+        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' +
                  regproxy_port)
         evento_log = 'Error: No server listening at ' + regproxy_IP + \
                      ' port ' + regproxy_port
@@ -156,7 +156,7 @@ elif metodo == 'INVITE':
         hora = time.gmtime(time.time())
         makeLog(log_file, hora, evento_log)
     except socket.error:
-        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + 
+        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' +
                  regproxy_port)
         evento_log = 'Error: No server listening at ' + regproxy_IP + \
                      ' port ' + regproxy_port
@@ -167,8 +167,8 @@ elif metodo == 'INVITE':
     if slices[1] == '100' and slices[4] == '180' and slices[7] == '200':
         metodo == 'ACK'
         peticion = 'ACK sip:' + opcion + ' SIP/2.0'
-        ip_destino = slices[13] #  destino del RTP
-        port_destino = slices[17] #  destino del RTP
+        ip_destino = slices[13]  #  destino del RTP
+        port_destino = slices[17]  #  destino del RTP
         print('Enviando: ' + peticion)
         try:
             my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
@@ -195,7 +195,7 @@ elif metodo == 'INVITE':
             hora = time.gmtime(time.time())
             makeLog(log_file, hora, evento_log)
         except socket.error:
-            sys.exit('Error: No server listening at ' + ip_destino + 
+            sys.exit('Error: No server listening at ' + ip_destino +
                      ' port ' + port_destino)
             evento_log = 'Error: No server listening at ' + regproxy_IP + \
                          ' port ' + regproxy_port
@@ -217,7 +217,7 @@ elif metodo == 'BYE':
         hora = time.gmtime(time.time())
         makeLog(log_file, hora, evento_log)
     except socket.error:
-        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + 
+        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' +
                  regproxy_port)
         evento_log = 'Error: No server listening at ' + regproxy_IP + \
                      ' port ' + regproxy_port

@@ -161,7 +161,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         self.json2registered()
                         self.now = time.time()
                         self.expire_time = float(self.expires) +\
-                             float(self.now)
+                            float(self.now)
                         self.client_list = []
                         self.client_list.append(self.client_address[0])  # IP
                         self.client_list.append(self.port)  # Puerto
@@ -197,7 +197,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         my_socket.connect((IPserver, int(PORTserver)))
                         my_socket.send(bytes(line, 'utf-8'))
                         evento_log = ' Sent to ' + IPserver + ':' + \
-                                      PORTserver + ': ' + line
+                            PORTserver + ': ' + line
                         hora = time.gmtime(time.time())
                         makeLog(log_file, hora, evento_log)
                         data = my_socket.recv(int(serverPort))

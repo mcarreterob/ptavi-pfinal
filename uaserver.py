@@ -107,9 +107,9 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 peticion += 'SIP/2.0 180 Ring\r\n\r\n'
                 peticion += 'SIP/2.0 200 OK\r\n\r\n'
                 peticion += 'Content-Type: application/sdp\r\n\r\n' + \
-                          'v=0\r\n' + 'o=' + username + ' ' + uas_ip + \
-                          '\r\n' + 's=misesion\r\n' + 't=0\r\n' + \
-                          'm=audio ' + rtp_port + ' RTP\r\n\r\n'
+                    'v=0\r\n' + 'o=' + username + ' ' + uas_ip + \
+                    '\r\n' + 's=misesion\r\n' + 't=0\r\n' + \
+                    'm=audio ' + rtp_port + ' RTP\r\n\r\n'
                 evento_log = ' Sent to ' + regproxy_IP + ':' + \
                              regproxy_port + ': ' + peticion
                 hora = time.gmtime(time.time())
@@ -124,7 +124,7 @@ class EchoHandler(socketserver.DatagramRequestHandler):
             elif metodo == 'ACK':
                 print('me esta llegando ', line)
                 evento_log = ' Received from ' + regproxy_IP + ':' + \
-                              regproxy_port + ': ' + line
+                             regproxy_port + ': ' + line
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
                 #  vlc = 'cvlc rtp://@' + self.rtp_list[1] + ':' + \
@@ -134,7 +134,7 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 aEjecutar = './mp32rtp -i ' + self.rtp_list[1] + ' -p '
                 aEjecutar += self.rtp_list[2] + ' < ' + audio_file
                 evento_log = ' Sending to ' + self.rtp_list[1] + ':' + \
-                            self.rtp_list[2] + ': ' + 'audio_file'
+                    self.rtp_list[2] + ': ' + 'audio_file'
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
                 print('Vamos a ejecutar', aEjecutar)
@@ -147,13 +147,13 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 makeLog(log_file, hora, evento_log)
             elif metodo == 'BYE':
                 evento_log = ' Received from ' + regproxy_IP + ':' + \
-                              regproxy_port + ': ' + line
+                    regproxy_port + ': ' + line
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
                 peticion = 'SIP/2.0 200 OK\r\n\r\n'
                 self.wfile.write(bytes(peticion, 'utf-8'))
                 evento_log = ' Sent to ' + regproxy_IP + ':' + \
-                            regproxy_port + ': ' + peticion
+                    regproxy_port + ': ' + peticion
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
             elif metodo != 'INVITE' or metodo != 'BYE' or metodo != 'ACK':
@@ -164,7 +164,7 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 peticion = 'SIP/2.0 405 Method Not Allowed\r\n\r\n'
                 self.wfile.write(byes(peticion, 'utf-8'))
                 evento_log = ' Sent to ' + regproxy_IP + ':' + \
-                            regproxy_port + ': ' + peticion
+                    regproxy_port + ': ' + peticion
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
             else:
@@ -175,7 +175,7 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 peticion = 'SIP/2.0 400 Bad Request'
                 self.wfile.write(bytes(peticion, 'utf-8'))
                 evento_log = ' Sent to ' + regproxy_IP + ':' + \
-                            regproxy_port + ': ' + peticion
+                    regproxy_port + ': ' + peticion
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
 
