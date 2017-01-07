@@ -104,11 +104,11 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 makeLog(log_file, hora, evento_log)
                 peticion = 'SIP/2.0 100 Trying\r\n\r\n'
                 peticion += 'SIP/2.0 180 Ring\r\n\r\n'
-                peticion += 'SIP/2.0 200 OK\r\n'
+                peticion += 'SIP/2.0 200 OK\r\n\r\n'
                 peticion += 'Content-Type: application/sdp\r\n\r\n' + \
                            'v=0\r\n' + 'o=' + username + ' ' + uas_ip + \
                            '\r\n' + 's=misesion\r\n' + 't=0\r\n' + \
-                           'm=audio ' + rtp_port + ' RTP\r\n'
+                           'm=audio ' + rtp_port + ' RTP\r\n\r\n'
                 evento_log = ' Sent to ' + regproxy_IP + ':' + \
                              regproxy_port + ': ' + peticion
                 hora = time.gmtime(time.time())
