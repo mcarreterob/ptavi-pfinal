@@ -17,6 +17,7 @@ try:
 except IndexError:
     sys.exit('Usage: python3 proxy_registrar.py config')
 
+
 class XMLHandler(ContentHandler):
 
     def __init__(self):
@@ -39,7 +40,7 @@ class XMLHandler(ContentHandler):
             self.data_list.append(self.config_dic)
             self.config_dic = {}
         elif name == 'log':
-            self.config_dic['path'] =  attrs.get('path', '--')
+            self.config_dic['path'] = attrs.get('path', '--')
             self.data_list.append(self.config_dic)
             self.config_dic = {}
 
@@ -59,6 +60,7 @@ database_path = data_list[1]['path']
 passwd_path = data_list[1]['passwdpath']
 log_file = data_list[2]['path']
 
+
 def makeLog(log_file, hora, evento_log):
     fichero = open(log_file, 'a')
     hora = time.gmtime(time.time())
@@ -72,7 +74,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
     """
     Echo server class
     """
-    data_client = {} # Diccionario de clientes registrados
+    data_client = {}  # Diccionario de clientes registrados
     nonce = []
 
     def register2json(self):
@@ -99,9 +101,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                                       time.gmtime(time.time()))
         for client in self.data_client:
             self.expire = int(self.data_client[client][-1])
-            #print(self.data_client)
             now = time.time()
-            #print("now", now, "expire", self.expire)
             if self.expire < now:
                 tmpList.append(client)
         for cliente in tmpList:
@@ -112,7 +112,6 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
     def handle(self):
         """Metodo que gestiona las peticiones"""
         self.json2registered()
-        #print("linea 105", self.data_client)
         while 1:
             line = self.rfile.read().decode('utf-8')
             print('El cliente nos manda: ' + line)
@@ -130,11 +129,11 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                     self.nonce.append(str(random.randint(0000, 9999)))
                     respuesta = 'SIP/2.0 401 Unauthorized\r\n' + \
                                 'WWW Authenticate: Digest nonce=' + \
-                                 self.nonce[0] + '\r\n\r\n'
+                                self.nonce[0] + '\r\n\r\n'
                     self.wfile.write(bytes(respuesta, 'utf-8'))
                     evento_log = ' Sent to ' + self.client_address[0] + ':' + \
-                                  str(self.client_address[1]) + ': ' + \
-                                  respuesta
+                                 str(self.client_address[1]) + ': ' + \
+                                 respuesta
                     hora = time.gmtime(time.time())
                     makeLog(log_file, hora, evento_log)
                 else:
@@ -162,10 +161,10 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         self.json2registered()
                         self.now = time.time()
                         self.expire_time = float(self.expires) +\
-                              float(self.now)
+                             float(self.now)
                         self.client_list = []
-                        self.client_list.append(self.client_address[0]) # IP
-                        self.client_list.append(self.port) # Puerto
+                        self.client_list.append(self.client_address[0])  # IP
+                        self.client_list.append(self.port)  # Puerto
                         self.client_list.append(self.now)
                         self.client_list.append(self.expire_time)
                         self.data_client[self.user] = self.client_list
@@ -180,7 +179,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                     self.register2json()
             elif metodo == 'INVITE':
                 self.json2registered()
-                user = line.split()[1].split(':')[1] # Al que mando el INVITE
+                user = line.split()[1].split(':')[1]  # Al que mando el INVITE
                 rtp_port = line.split()[-2]
                 evento_log = ' Received from ' + self.client_address[0] + \
                              ':' + str(self.client_address[1]) + ': ' + line
@@ -188,8 +187,8 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 makeLog(log_file, hora, evento_log)
                 if user in self.data_client.keys():
                     self.json2registered()
-                    IPserver = self.data_client[user][0] # IP destino
-                    PORTserver = self.data_client[user][1] # Puerto destino
+                    IPserver = self.data_client[user][0]  # IP destino
+                    PORTserver = self.data_client[user][1]  # Puerto destino
                     try:
                         my_socket = socket.socket(socket.AF_INET,
                                                   socket.SOCK_DGRAM)
@@ -235,9 +234,9 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
                 self.json2registered()
-                user = line.split()[1].split(':')[1] # Al que mando el ACK
-                IPserver = self.data_client[user][0] # IP destino
-                PORTserver = self.data_client[user][1] # Puerto destino
+                user = line.split()[1].split(':')[1]  # Al que mando el ACK
+                IPserver = self.data_client[user][0]  # IP destino
+                PORTserver = self.data_client[user][1]  # Puerto destino
                 my_socket = socket.socket(socket.AF_INET,
                                           socket.SOCK_DGRAM)
                 my_socket.setsockopt(socket.SOL_SOCKET,
@@ -266,9 +265,9 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
                 self.json2registered()
-                user = line.split()[1].split(':')[1] # Al que mando el BYE
-                IPserver = self.data_client[user][0] # IP destino
-                PORTserver = self.data_client[user][1] # Puerto destino
+                user = line.split()[1].split(':')[1]  # Al que mando el BYE
+                IPserver = self.data_client[user][0]  # IP destino
+                PORTserver = self.data_client[user][1]  # Puerto destino
                 my_socket = socket.socket(socket.AF_INET,
                                           socket.SOCK_DGRAM)
                 my_socket.setsockopt(socket.SOL_SOCKET,

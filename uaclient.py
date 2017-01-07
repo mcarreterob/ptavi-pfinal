@@ -16,6 +16,7 @@ try:
 except IndexError:
     sys.exit('Usage: python uaclient.py config method option')
 
+
 class XMLHandler(ContentHandler):
 
     def __init__(self):
@@ -46,7 +47,7 @@ class XMLHandler(ContentHandler):
             self.data_list.append(self.config_dic)
             self.config_dic = {}
         elif name == 'log':
-            self.config_dic['log_path'] =  attrs.get('path', '--')
+            self.config_dic['log_path'] = attrs.get('path', '--')
             self.data_list.append(self.config_dic)
             self.config_dic = {}
         elif name == 'audio':
@@ -74,6 +75,7 @@ regproxy_IP = data_list[3]['reg_ip']
 regproxy_port = data_list[3]['reg_port']
 log_file = data_list[4]['log_path']
 audio_file = data_list[5]['audio_path']
+
 
 def makeLog(log_file, hora, evento_log):
     fichero = open(log_file, 'a')
@@ -105,7 +107,7 @@ if metodo == 'REGISTER':
         makeLog(log_file, hora, evento_log)
         data = my_socket.recv(int(regproxy_port))
         evento_log = ' Received from ' + regproxy_IP + ':' + \
-                      regproxy_port + ': ' + data.decode('utf-8')
+                     regproxy_port + ': ' + data.decode('utf-8')
         hora = time.gmtime(time.time())
         makeLog(log_file, hora, evento_log)
         print('Recibido -- ', data.decode('utf-8'))
@@ -125,12 +127,12 @@ if metodo == 'REGISTER':
             makeLog(log_file, hora, evento_log)
             data = my_socket.recv(int(regproxy_port))
             evento_log = ' Received from ' + regproxy_IP + ':' + \
-                          regproxy_port + ': ' + data.decode('utf-8')
+                         regproxy_port + ': ' + data.decode('utf-8')
             hora = time.gmtime(time.time())
             makeLog(log_file, hora, evento_log)
             print('Recibido -- ', data.decode('utf-8'))
     except socket.error:
-        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + \
+        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + 
                  regproxy_port)
         evento_log = 'Error: No server listening at ' + regproxy_IP + \
                      ' port ' + regproxy_port
@@ -150,11 +152,11 @@ elif metodo == 'INVITE':
         makeLog(log_file, hora, evento_log)
         data = my_socket.recv(int(regproxy_port))
         evento_log = ' Received from ' + regproxy_IP + ':' + \
-                      regproxy_port + ': ' + data.decode('utf-8')
+                     regproxy_port + ': ' + data.decode('utf-8')
         hora = time.gmtime(time.time())
         makeLog(log_file, hora, evento_log)
     except socket.error:
-        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + \
+        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + 
                  regproxy_port)
         evento_log = 'Error: No server listening at ' + regproxy_IP + \
                      ' port ' + regproxy_port
@@ -165,8 +167,8 @@ elif metodo == 'INVITE':
     if slices[1] == '100' and slices[4] == '180' and slices[7] == '200':
         metodo == 'ACK'
         peticion = 'ACK sip:' + opcion + ' SIP/2.0'
-        ip_destino = slices[13] # destino del RTP
-        port_destino = slices[17] # destino del RTP
+        ip_destino = slices[13] #  destino del RTP
+        port_destino = slices[17] #  destino del RTP
         print('Enviando: ' + peticion)
         try:
             my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
@@ -179,13 +181,13 @@ elif metodo == 'INVITE':
             print('Vamos a ejecutar', aEjecutar)
             os.system(aEjecutar)
             evento_log = ' Sending to ' + ip_destino + ':' + \
-                          port_destino + ': ' + 'audio_file'
+                         port_destino + ': ' + 'audio_file'
             hora = time.gmtime(time.time())
             makeLog(log_file, hora, evento_log)
             print('Finished transfer')
-            #vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino
-            #print(vlc)
-            #os.system(vlc)
+            #  vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino
+            #  print(vlc)
+            #  os.system(vlc)
             data = my_socket.recv(int(port_destino))
             evento_log = ' Finished audio transfer to ' + \
                          ip_destino + ':' + port_destino + \
@@ -193,7 +195,7 @@ elif metodo == 'INVITE':
             hora = time.gmtime(time.time())
             makeLog(log_file, hora, evento_log)
         except socket.error:
-            sys.exit('Error: No server listening at ' + ip_destino + \
+            sys.exit('Error: No server listening at ' + ip_destino + 
                      ' port ' + port_destino)
             evento_log = 'Error: No server listening at ' + regproxy_IP + \
                          ' port ' + regproxy_port
@@ -211,11 +213,11 @@ elif metodo == 'BYE':
         makeLog(log_file, hora, evento_log)
         data = my_socket.recv(int(regproxy_port))
         evento_log = ' Received from ' + regproxy_IP + ':' + \
-                      regproxy_port + ': ' + data.decode('utf-8')
+                     regproxy_port + ': ' + data.decode('utf-8')
         hora = time.gmtime(time.time())
         makeLog(log_file, hora, evento_log)
     except socket.error:
-        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + \
+        sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' + 
                  regproxy_port)
         evento_log = 'Error: No server listening at ' + regproxy_IP + \
                      ' port ' + regproxy_port
