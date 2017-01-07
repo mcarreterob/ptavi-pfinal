@@ -220,7 +220,8 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         makeLog(log_file, hora, evento_log)
                 else:
                     evento_log = ' Received from ' + self.client_address[0] + \
-                                 ':' + self.client_address[1] + ': ' + line
+                                 ':' + str(self.client_address[1]) + ': ' + \
+                                 line
                     hora = time.gmtime(time.time())
                     makeLog(log_file, hora, evento_log)
                     self.wfile.write(b'SIP/2.0 404 User Not Found\r\n\r\n')
