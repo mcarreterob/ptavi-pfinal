@@ -205,8 +205,7 @@ elif metodo == 'INVITE':
             makeLog(log_file, hora, evento_log)
             # END_LOG
             print('Finished transfer')
-            vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino + \
-                   ' 2> /dev/null'
+            vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino
             print(vlc)
             os.system(vlc)
             data = my_socket.recv(int(port_destino))
