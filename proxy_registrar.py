@@ -208,8 +208,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         hora = time.gmtime(time.time())
                         makeLog(log_file, hora, evento_log)
                         print('Recibido -- ', data.decode('utf-8'))
-                        self.wfile.write(bytes(datos_recibidos, 'utf-8') + \
-                                         b'\r\n')
+                        self.wfile.write(bytes(datos_recibidos, 'utf-8'))
                     except socket.error:
                         error = 'Error: No server listening at ' + \
                                   IPserver + ' port ' + PORTserver
