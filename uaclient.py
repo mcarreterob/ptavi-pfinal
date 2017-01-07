@@ -167,8 +167,8 @@ elif metodo == 'INVITE':
     if slices[1] == '100' and slices[4] == '180' and slices[7] == '200':
         metodo == 'ACK'
         peticion = 'ACK sip:' + opcion + ' SIP/2.0'
-        ip_destino = slices[13]  #  destino del RTP
-        port_destino = slices[17]  #  destino del RTP
+        ip_destino = slices[13]  # destino del RTP
+        port_destino = slices[17]  # destino del RTP
         print('Enviando: ' + peticion)
         try:
             my_socket.send(bytes(peticion, 'utf-8') + b'\r\n\r\n')
