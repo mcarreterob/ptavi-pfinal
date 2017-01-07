@@ -98,12 +98,10 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 break
             metodo = line_slices[0]
             if metodo == 'INVITE':
-                # START_LOG
                 evento_log = ' Received from ' + regproxy_IP + ':' + \
                               regproxy_port + ': ' + line
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
                 peticion = 'SIP/2.0 100 Trying\r\n\r\n'
                 peticion += 'SIP/2.0 180 Ring\r\n\r\n'
                 peticion += 'SIP/2.0 200 OK\r\n'
@@ -111,12 +109,10 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                            'v=0\r\n' + 'o=' + username + ' ' + uas_ip + \
                            '\r\n' + 's=misesion\r\n' + 't=0\r\n' + \
                            'm=audio ' + rtp_port + ' RTP\r\n'
-                # START_LOG
                 evento_log = ' Sent to ' + regproxy_IP + ':' + \
                              regproxy_port + ': ' + peticion
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
                 self.wfile.write(bytes(peticion, 'utf-8'))
                 self.rtp_user = line_slices[6].split('=')[1]
                 self.rtp_list.append(self.rtp_user)
@@ -126,79 +122,61 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 self.rtp_list.append(self.rtp_port)
             elif metodo == 'ACK':
                 print('me esta llegando ', line)
-                # START_LOG
                 evento_log = ' Received from ' + regproxy_IP + ':' + \
                               regproxy_port + ': ' + line
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
-                vlc = 'cvlc rtp://@' + self.rtp_list[1] + ':' + \
-                        self.rtp_list[2] + ' 2> /dev/null'
-                print('Vamos a ejecutar', vlc)
+                #vlc = 'cvlc rtp://@' + self.rtp_list[1] + ':' + \
+                #        self.rtp_list[2] + ' 2> /dev/null'
+                #print('Vamos a ejecutar', vlc)
                 os.system(vlc)
                 aEjecutar = './mp32rtp -i ' + self.rtp_list[1] + ' -p '
                 aEjecutar += self.rtp_list[2] + ' < ' + audio_file
-                # START_LOG
                 evento_log = ' Sending to ' + self.rtp_list[1] + ':' + \
                               self.rtp_list[2] + ': ' + 'audio_file'
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
                 print('Vamos a ejecutar', aEjecutar)
                 os.system(aEjecutar)
                 print('Finished transfer')
-                # START_LOG
                 evento_log = ' Finished audio transfer to ' + \
                              self.rtp_list[1] + ':' + self.rtp_list[2] + \
                              ': ' + 'audio_file'
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
             elif metodo == 'BYE':
-                # START_LOG
                 evento_log = ' Received from ' + regproxy_IP + ':' + \
                               regproxy_port + ': ' + line
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
                 peticion = 'SIP/2.0 200 OK\r\n\r\n'
                 self.wfile.write(bytes(peticion, 'utf-8'))
-                # START_LOG
                 evento_log = ' Sent to ' + regproxy_IP + ':' + \
                               regproxy_port + ': ' + peticion
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
             elif metodo != 'INVITE' or metodo != 'BYE' or metodo != 'ACK':
-                # START_LOG
                 evento_log = ' Received from ' + regproxy_IP + ':' + \
                               regproxy_port + ': ' + line
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
                 peticion = 'SIP/2.0 405 Method Not Allowed\r\n\r\n'
                 self.wfile.write(byes(peticion, 'utf-8'))
-                # START_LOG
                 evento_log = ' Sent to ' + regproxy_IP + ':' + \
                               regproxy_port + ': ' + peticion
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
             else:
-                # START_LOG
                 evento_log = ' Received from ' + regproxy_IP + ':' + \
                               regproxy_port + ': ' + line
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
                 peticion = 'SIP/2.0 400 Bad Request'
                 self.wfile.write(bytes(peticion, 'utf-8'))
-                # START_LOG
                 evento_log = ' Sent to ' + regproxy_IP + ':' + \
                               regproxy_port + ': ' + peticion
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                # END_LOG
 
 # Creamos servidor y escuchamos
 # START_LOG
@@ -211,9 +189,7 @@ try:
     print("Listening...")
     serv.serve_forever()
 except KeyboardInterrupt:
-    # START_LOG
     evento_log = ' Finishing uaserver.'
     hora = time.gmtime(time.time())
     makeLog(log_file, hora, evento_log)
-    # END_LOG
     sys.exit('\r\nFinished uaserver')
