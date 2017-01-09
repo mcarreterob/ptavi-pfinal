@@ -134,7 +134,7 @@ if metodo == 'REGISTER':
     except socket.error:
         sys.exit('Error: No server listening at ' + regproxy_IP + ' port ' +
                  regproxy_port)
-        evento_log = 'Error: No server listening at ' + regproxy_IP + \
+        evento_log = ' Error: No server listening at ' + regproxy_IP + \
                      ' port ' + regproxy_port
         hora = time.gmtime(time.time())
         makeLog(log_file, hora, evento_log)
