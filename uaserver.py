@@ -127,10 +127,6 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                              regproxy_port + ': ' + line
                 hora = time.gmtime(time.time())
                 makeLog(log_file, hora, evento_log)
-                #  vlc = 'cvlc rtp://@' + self.rtp_list[1] + ':' + \
-                #        self.rtp_list[2] + ' 2> /dev/null'
-                #  print('Vamos a ejecutar', vlc)
-                #  os.system(vlc)
                 aEjecutar = './mp32rtp -i ' + self.rtp_list[1] + ' -p '
                 aEjecutar += self.rtp_list[2] + ' < ' + audio_file
                 evento_log = ' Sending to ' + self.rtp_list[1] + ':' + \

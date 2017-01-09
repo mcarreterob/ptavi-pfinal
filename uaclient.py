@@ -185,9 +185,6 @@ elif metodo == 'INVITE':
             hora = time.gmtime(time.time())
             makeLog(log_file, hora, evento_log)
             print('Finished transfer')
-            #  vlc = 'cvlc rtp://@' + ip_destino + ':' + port_destino
-            #  print(vlc)
-            #  os.system(vlc)
             data = my_socket.recv(int(port_destino))
             evento_log = ' Finished audio transfer to ' + \
                          ip_destino + ':' + port_destino + \
