@@ -209,7 +209,7 @@ class RegisterHandler(socketserver.DatagramRequestHandler):
                         print('Recibido -- ', data.decode('utf-8'))
                         self.wfile.write(bytes(datos_recibidos, 'utf-8'))
                     except socket.error:
-                        error = 'Error: No server listening at ' + \
+                        error = ' Error: No server listening at ' + \
                                   IPserver + ' port ' + PORTserver
                         self.wfile.write(bytes(error, 'utf-8'))
                         evento_log = ' Sent to ' + self.client_address[0] + \
